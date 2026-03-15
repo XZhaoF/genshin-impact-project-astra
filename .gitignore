@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Scraped data (regenerable via `python scrape_all.py`)
+data/characters/*.json
+data/characters/_manifest.json
+
+# Keep the data directory structure
+!data/characters/.gitkeep
+
+# Sanity check artifacts
+sanity_check_output.json
+
+# OS
+Thumbs.db
+.DS_Store
