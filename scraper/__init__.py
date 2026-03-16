@@ -18,3 +18,4 @@ from scraper.chunking import (
     group_voice_overs_into_chunks,
 )
 from scraper.character_scraper import scrape_character
+from scraper.quest_scraper import scrape_quest_act, scrape_world_quest_series

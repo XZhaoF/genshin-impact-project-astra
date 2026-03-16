@@ -14,12 +14,21 @@ venv/
 .vscode/
 .idea/
 
-# Scraped data (regenerable via `python scrape_all.py`)
+# Cursor
+.cursor/
+
+# Scraped data (regenerable via scrape_all.py and scrape_quests.py)
 data/characters/*.json
 data/characters/_manifest.json
+data/quests/archon/*.json
+data/quests/archon/_manifest.json
+data/quests/world_series/*.json
+data/quests/world_series/_manifest.json
 
 # Keep the data directory structure
 !data/characters/.gitkeep
+!data/quests/archon/.gitkeep
+!data/quests/world_series/.gitkeep
 
 # Sanity check artifacts
 sanity_check_output.json

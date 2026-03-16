@@ -1,10 +1,14 @@
 # Project Astra -- Genshin Impact Lore RAG
 
-A Retrieval-Augmented Generation (RAG) pipeline that scrapes, chunks, and structures character lore from the [Genshin Impact Fandom Wiki](https://genshin-impact.fandom.com/) for semantic search and LLM-powered Q&A.
+A Retrieval-Augmented Generation (RAG) pipeline that scrapes, chunks, and structures Genshin Impact lore from the [Fandom Wiki](https://genshin-impact.fandom.com/) for semantic search and LLM-powered Q&A.
 
 ## What it does
 
-The scraper extracts lore from **four wiki page types** per character:
+The scraper extracts lore from **three content types**:
+
+### Playable characters (112 characters, 4,400 chunks)
+
+Four wiki page types per character:
 
 | Page | Content | Method |
 |------|---------|--------|
@@ -14,14 +18,24 @@ The scraper extracts lore from **four wiki page types** per character:
 | `/Storyline` | Full narrative history across Archon/Story/World Quests | Heading-based splitting |
 | `/Voice-Overs` | Lore-relevant dialogue lines (About X, More About, etc.) | `{{VO/Story}}` template parser |
 
+### Archon Quest acts (44 acts, 310 chunks)
+
+Act overview pages with narrative summaries for each chapter of the main story (Prologue through Song of the Welkin Moon).
+
+### World Quest Series (47 of 63 series, 99 chunks)
+
+Important world quest chains (Aranyaka, Golden Slumber, Sacred Sakura Cleansing Ritual, etc.). Some series are marked "To be added" on the wiki and produce 0 chunks until updated.
+
 Each piece of content is cleaned from wikitext markup, split into chunks sized for embedding (~400 tokens), and annotated with structured metadata for filtered retrieval.
 
 ### Current stats
 
-- **112** playable characters with lore content
-- **4,400** chunks across all characters
-- **~719K** tokens total
-- **4 chunk types**: `character_story`, `wiki_section`, `voice_over`, `voice_over_batch`
+| Content | Entries | Chunks | Tokens |
+|---------|---------|--------|--------|
+| Playable characters | 112 | 4,400 | ~719K |
+| Archon Quest acts | 44 | 310 | ~88K |
+| World Quest Series | 47 | 99 | ~23K |
+| **Total** | **203** | **4,809** | **~830K** |
 
 ## Project structure
 
@@ -33,9 +47,14 @@ project-astra/
     parsers.py               # Wikitext cleaner + template parsers
     chunking.py              # Section splitting, chunk sizing, VO grouping
     character_scraper.py     # Orchestrator: scrape one character end-to-end
+    quest_scraper.py         # Archon Quest acts + World Quest Series scraper
   data/
     characters/              # Per-character JSON files (generated, gitignored)
-  scrape_all.py              # CLI entry point to scrape all characters
+    quests/
+      archon/                # Archon Quest act summaries (gitignored)
+      world_series/          # World Quest Series summaries (gitignored)
+  scrape_all.py              # CLI: scrape all playable characters
+  scrape_quests.py          # CLI: scrape archon quests and/or world quest series
 ```
 
 ## Quick start
@@ -46,20 +65,29 @@ git clone https://github.com/<you>/genshin-impact-project-astra.git
 cd genshin-impact-project-astra
 pip install requests
 
-# Scrape all 112+ playable characters (~5 min with rate limiting)
+# Scrape playable characters (~5 min)
 python scrape_all.py
 
-# Scrape a single character
+# Scrape Archon Quest acts (~1 min)
+python scrape_quests.py
+
+# Scrape World Quest Series (~2 min)
+python scrape_quests.py --world-quests
+
+# Or scrape everything
+python scrape_quests.py --all
+
+# Single-item scrape
 python scrape_all.py --character "Raiden Shogun"
+python scrape_quests.py --quest "True Moon"
+python scrape_quests.py --world-quests --quest "Golden Slumber"
 
-# Re-scrape even if JSON already exists
+# Re-scrape existing
 python scrape_all.py --force
-
-# Test mode: scrape 4 characters only
-python scrape_all.py --test
+python scrape_quests.py --force
 ```
 
-Output lands in `data/characters/` as one JSON file per character, plus a `_manifest.json` index.
+Output lands in `data/characters/`, `data/quests/archon/`, and `data/quests/world_series/`, each with a `_manifest.json` index.
 
 ## Design decisions
 
@@ -123,10 +151,13 @@ Metadata fields enable filtered retrieval -- e.g., search only Mondstadt charact
 
 ## Roadmap
 
-- [ ] Embedding pipeline (Pinecone + sentence-transformers)
-- [ ] Query interface with LLM-generated answers (Groq)
-- [ ] Expand scraping to non-playable characters, quests, and world lore
-- [ ] Web frontend for public access
+- [x] Wiki scraper for 112+ playable characters (Profile, Storyline, Voice-Overs)
+- [x] Wiki scraper for 44 Archon Quest acts
+- [x] Wiki scraper for 63 World Quest Series (47 with summaries)
+- [ ] Embedding pipeline (Pinecone + sentence-transformers) for all ~4,800 chunks
+- [ ] RAG query engine (Gemini 2.5 Flash-Lite + Groq fallback)
+- [ ] Anti-proxy guardrails and web frontend
+- [ ] Expand scraping to NPCs and additional lore pages
 
 ## Data source
 
