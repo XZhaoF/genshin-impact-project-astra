@@ -1,0 +1,16 @@
+# Scraping
+requests
+
+# Embedding + vector store (Phase 1)
+sentence-transformers
+pinecone
+python-dotenv
+tqdm
+
+# Query engine + LLM providers (Phase 2)
+google-genai
+groq
+
+# Web backend (Phase 5)
+fastapi
+uvicorn[standard]
