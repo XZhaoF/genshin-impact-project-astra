@@ -1,6 +1,6 @@
 # Project Astra -- Genshin Impact Lore RAG
 
-A Retrieval-Augmented Generation (RAG) pipeline that scrapes, chunks, and embeds Genshin Impact lore from the [Fandom Wiki](https://genshin-impact.fandom.com/), stores it in Pinecone, and answers lore questions with **Gemini 2.5 Flash-Lite** (Groq fallback).
+A Retrieval-Augmented Generation (RAG) pipeline that scrapes, chunks, and embeds Genshin Impact lore from the [Fandom Wiki](https://genshin-impact.fandom.com/), stores it in Pinecone, and answers lore questions with **Gemini 3.1 Flash-Lite** (Groq fallback).
 
 ## What it does
 
@@ -44,7 +44,7 @@ Important world quest chains (Aranyaka, Golden Slumber, Sacred Sakura Cleansing 
 |-------|--------|
 | Embeddings | `sentence-transformers/all-MiniLM-L6-v2` (384-dim, cosine) |
 | Vector DB | Pinecone serverless index `genshin-lore` |
-| Primary LLM | `gemini-2.5-flash-lite` via `google-genai` |
+| Primary LLM | `gemini-3.1-flash-lite` via `google-genai` (temporary; 500 RPD free tier vs 20 on 2.5) |
 | Fallback LLM | Groq `llama-3.3-70b-versatile` (on Gemini error) |
 | Retrieval | Static top-k (default **10**), score threshold **0.35** |
 | Guardrail | Refuse off-topic queries before any LLM call if top score &lt; 0.35 |
@@ -169,7 +169,7 @@ Fixed-size chunking splits mid-paragraph or mid-story. Section-based chunking ke
 
 ### Why Gemini + Groq fallback?
 
-- Flash-Lite is cheap and sufficient for closed-book RAG (facts come from retrieved chunks)
+- Flash-Lite is sufficient for closed-book RAG (facts come from retrieved chunks); using 3.1 for higher free-tier daily quota
 - Groq provides a free-tier fallback when Gemini rate-limits or billing blocks requests
 - Temperature 0.3 keeps answers grounded in context
 
@@ -215,7 +215,7 @@ Vector IDs in Pinecone equal `chunk_id`. Re-scraping overwrites vectors with the
 - [x] Wiki scraper for playable characters (Profile, Storyline, Voice-Overs)
 - [x] Wiki scraper for Archon Quest acts and World Quest Series
 - [x] Embedding pipeline (Pinecone + sentence-transformers)
-- [x] RAG query engine (Gemini 2.5 Flash-Lite + Groq fallback)
+- [x] RAG query engine (Gemini 3.1 Flash-Lite + Groq fallback)
 - [x] Score-threshold refusal (anti-proxy guardrail)
 - [x] Headless sanity check (`rag_test.py`)
 - [ ] Metadata-aware retrieval (auto region/type filters, query rewriting)

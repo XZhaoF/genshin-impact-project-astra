@@ -31,7 +31,8 @@ DEFAULT_TOP_K = 10
 
 # LLM generation configuration ----------------------------------------------
 
-GEMINI_MODEL = "gemini-2.5-flash-lite"          # primary
+# Temporarily on 3.1 Flash-Lite: higher free-tier RPD (500 vs 20 on 2.5) on current AI Studio quotas.
+GEMINI_MODEL = "gemini-3.1-flash-lite"          # primary
 GROQ_MODEL = "llama-3.3-70b-versatile"          # fallback (OpenAI-compatible)
 
 # Low temperature keeps answers grounded in the retrieved context rather than
@@ -190,12 +191,13 @@ def retrieve(question, top_k=DEFAULT_TOP_K, filters=None):
 
 SYSTEM_INSTRUCTION = (
     "You are a knowledgeable lore expert for the video game Genshin Impact. "
-    "Answer the user's question using ONLY the numbered context passages provided. "
+    "Answer the user's question using the numbered context passages provided. "
+    "Try to give more information to expand user's question, not only just answer the direct question. "
     "The passages are drawn from the official wiki (character profiles, Archon "
     "Quests, and World Quest storylines).\n\n"
     "Rules:\n"
-    "- Base every claim strictly on the provided context. Do not invent details "
-    "or use outside knowledge.\n"
+    "- Base claims on the provided context when possible. You can use outside knowledge "
+    "if they match on the provided context.\n"
     "- If the context does not contain enough information to answer, say so plainly "
     "instead of guessing.\n"
     "- Only answer questions about Genshin Impact lore. Politely decline anything "
@@ -236,7 +238,7 @@ def build_prompt(question, sources):
 # LLM generation ------------------------------------------------------------
 
 def _generate_with_gemini(prompt):
-    """Generate an answer with Gemini 2.5 Flash-Lite. Raises on any failure."""
+    """Generate an answer with Gemini Flash-Lite. Raises on any failure."""
     from google.genai import types
 
     client = _get_gemini_client()
@@ -303,7 +305,7 @@ def ask(question, filters=None, top_k=DEFAULT_TOP_K):
       1. retrieve top-k chunks from Pinecone
       2. if the best score is below SCORE_THRESHOLD -> refuse (no LLM call)
       3. build the generation prompt
-      4. generate with Gemini 2.5 Flash-Lite, falling back to Groq on failure
+      4. generate with Gemini Flash-Lite, falling back to Groq on failure
     """
     sources = retrieve(question, top_k=top_k, filters=filters)
     top_score = sources[0]["score"] if sources else 0.0
