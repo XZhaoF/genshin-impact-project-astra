@@ -9,6 +9,62 @@ A Retrieval-Augmented Generation (RAG) pipeline that scrapes, chunks, and embeds
 3. **Embed** chunks locally with `all-MiniLM-L6-v2` (384-dim) and upsert to a Pinecone index.
 4. **Answer** questions by retrieving top-k chunks, applying a similarity threshold, and generating grounded answers with citations.
 
+### Example output (current pipeline)
+
+From `python rag_test.py --chat`, question **"What is the knight of favonius? Who is in it?"**:
+
+```
+==============================================================================
+Q: What is the knight of favonius? Who is in it?
+------------------------------------------------------------------------------
+The Knights of Favonius serve as the primary protectors of Mondstadt, tasked with
+safeguarding the city's freedom and peace [8]. The organization is built on the
+belief that protecting the city is a responsibility that extends beyond any single
+individual, requiring a legacy of knights who evolve alongside changing times,
+tactics, and equipment [8]. The title of "Dandelion Knight" is a prestigious
+honor passed down through generations of great knights, currently held by the
+Acting Grand Master [4].
+
+The Knights value an individual's abilities and deeds over their background or
+lineage [10]. While many aspire to join their ranks, such as Noelle, who works as
+a maid while studying knightly conduct and customs in hopes of one day becoming a
+knight herself [7], the organization includes a diverse range of members:
+
+* Jean: The Acting Grand Master of the Knights of Favonius, known for her
+  impeccable conduct and earnest dedication to her role as the "sword and aegis"
+  of the people [1, 4, 9].
+* Kaeya: The Cavalry Captain and a trusted aide to Jean, known for his wit and
+  charm [1, 6].
+* Klee: An explosives expert and official member known as the "Spark Knight" or
+  "Fleeing Sunlight," whose combat strength is significant, though her
+  hyperactivity often leads her to the confinement room [3, 6].
+* Eula: The Captain of the Reconnaissance Company and the "Spindrift Knight."
+  Despite being a descendant of the Lawrence clan, she severed ties with her
+  family to join the Knights and is highly regarded for her skill in resolving
+  crises and destroying Abyss Order strongholds [2, 10].
+* Varka: The Grand Master of the Knights, who emphasizes the importance of
+  nurturing a new generation of knights to serve as the organization's backbone [8].
+
+Additionally, while not a member of the Knights, the "mysterious tycoon" Diluc is
+often cited by Mondstadt citizens alongside Jean and Kaeya as one of the strongest
+figures associated with the city's defense [6].
+------------------------------------------------------------------------------
+  top_score=0.619  threshold=0.35  model=gemini-3.1-flash-lite
+  sources:
+    [1] 0.619  Kaeya | Introduction
+    [2] 0.601  Diluc | About [[Eula]]
+    [3] 0.598  Klee | Introduction
+    [4] 0.594  Jean | More About {name}: II
+    [5] 0.587  Diona | About [[Jean]]
+    [6] 0.577  Klee | Character Details
+    [7] 0.570  Noelle | Introduction
+    [8] 0.561  Varka | Character Story 4
+    [9] 0.550  Thoma | About [[Jean]]
+    [10] 0.550  Eula | Official Introduction
+```
+
+**What this shows:** strong retrieval for an organization/region question — top score **0.619**, with all ten sources Mondstadt characters whose profiles mention the Knights (Jean, Kaeya, Klee, Eula, Varka, Noelle). The model assembles a structured answer (role of the order + named members) with passage citations from character chunks rather than a single wiki article.
+
 ### Data sources
 
 | Content | Entries | Chunks | Tokens |
